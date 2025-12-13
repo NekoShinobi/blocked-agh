@@ -1,0 +1,19 @@
+services:
+  blocked-agh:
+    # image: ghcr.io/xNinjaKittyx/blocked-agh:main
+    build: .
+    container_name: blocked-agh
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      - ADGUARDHOME_URL=http://adguardhome:3000
+      - ADGUARDHOME_USER=admin
+      - ADGUARDHOME_PASS=your_password
+      - BLOCKED_AGH_URL=http://blocked-agh:8000
+      - NTFY_URL=https://ntfy.sh
+      - NTFY_TOPIC=UnblockRequests
+      - NTFY_TOKEN=your_ntfy_token
+      - BACKGROUND_IMAGE_URL=
+    depends_on:
+      - adguardhome

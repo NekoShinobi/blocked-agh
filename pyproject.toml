@@ -1,0 +1,16 @@
+[project]
+name = "blocked-agh"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.13"
+license-files = ["LICENSE"]
+dependencies = [
+    "aiohttp>=3.13.2",
+    "starlette>=0.50.0",
+    "uvicorn>=0.38.0",
+]
+
+[build-system]
+requires = ["uv_build>=0.9.17,<0.10.0"]
+build-backend = "uv_build"
