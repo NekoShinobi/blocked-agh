@@ -25,7 +25,7 @@ A web interface for checking if URLs are blocked by AdGuard Home and requesting 
 
 The web interface features a clean, modern design with a blurred background image and a centered input box for checking URLs.
 
-![alt text](https://github.com/xNinjaKittyx/blocked-agh/blob/main/screenshot.jpg?raw=true)
+![alt text](https://github.com/xNinjaKittyx/blocked-agh/blob/main/screenshot.png?raw=true)
 
 
 ## Requirements
