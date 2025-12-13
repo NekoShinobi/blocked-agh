@@ -36,9 +36,7 @@ if not all(
 logger = logging.getLogger()
 logger.setLevel(logging.DEBUG)
 # Create formatter and set formatter.
-formatter = logging.Formatter(
-    "%(asctime)s::%(levelname)s:%(module)s:%(lineno)d - %(message)s"
-)
+formatter = logging.Formatter("%(asctime)s::%(levelname)s:%(module)s:%(lineno)d - %(message)s")
 
 sh = logging.StreamHandler()
 sh.setFormatter(formatter)
@@ -46,8 +44,9 @@ logger.addHandler(sh)
 
 
 # The UI portion of this is mostly vibe-coded.
-async def homepage(request):
+async def homepage(request):  # noqa: RUF029
     # CSS styles with dynamic background image
+    # ruff: disable[E501]
     styles = f"""
         <style>
             body {{
@@ -301,6 +300,7 @@ async def homepage(request):
     </body>
     </html>
     """
+    # ruff: enable[E501]
     return HTMLResponse(html_content)
 
 
@@ -327,18 +327,14 @@ async def check_url(request):
     async with aiohttp.ClientSession() as session:
         agh_token = await get_agh_token(session)
         if not agh_token:
-            return JSONResponse(
-                {"error": "Failed to authenticate with AdGuard Home"}, status_code=500
-            )
+            return JSONResponse({"error": "Failed to authenticate with AdGuard Home"}, status_code=500)
         async with session.get(
             f"{ADGUARDHOME_URL}/control/filtering/check_host",
             params={"name": url, "qtype": "A"},
             cookies={"agh_session": agh_token},
         ) as resp:
             if resp.status != 200:
-                return JSONResponse(
-                    {"error": f"Failed to check URL: {resp.text}"}, status_code=500
-                )
+                return JSONResponse({"error": f"Failed to check URL: {resp.text}"}, status_code=500)
             result = await resp.json()
             logger.info(f"URL {url} check result: {result}")
 
@@ -396,9 +392,7 @@ async def unblock_url(request):
     async with aiohttp.ClientSession() as session:
         agh_token = await get_agh_token(session)
         if not agh_token:
-            return JSONResponse(
-                {"error": "Failed to authenticate with AdGuard Home"}, status_code=500
-            )
+            return JSONResponse({"error": "Failed to authenticate with AdGuard Home"}, status_code=500)
         async with session.get(f"{ADGUARDHOME_URL}/control/filtering/status") as resp:
             if resp.status != 200:
                 return JSONResponse(
@@ -418,14 +412,10 @@ async def unblock_url(request):
             cookies={"agh_session": agh_token},
         ) as resp:
             if resp.status != 200:
-                return JSONResponse(
-                    {"error": f"Failed to set user rules: {resp.text}"}, status_code=500
-                )
+                return JSONResponse({"error": f"Failed to set user rules: {resp.text}"}, status_code=500)
             logger.info(f"Unblock rule added for URL: {url}")
 
-    return JSONResponse(
-        {"url": url, "message": "Unblock request completed successfully"}
-    )
+    return JSONResponse({"url": url, "message": "Unblock request completed successfully"})
 
 
 app = Starlette(

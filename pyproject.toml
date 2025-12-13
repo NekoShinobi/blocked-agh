@@ -39,6 +39,7 @@ target-version = "py313"
 # McCabe complexity (`C901`) by default.
 select = ["E", "F", "UP", "RUF"]
 ignore = []
+preview = true
 
 # Allow autofix for all enabled rules (when `--fix`) is provided.
 fixable = ["ALL"]
