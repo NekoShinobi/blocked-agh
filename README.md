@@ -25,7 +25,7 @@ A web interface for checking if URLs are blocked by AdGuard Home and requesting 
 
 The web interface features a clean, modern design with a blurred background image and a centered input box for checking URLs.
 
-![alt text](https://github.com/xNinjaKittyx/blocked-agh/blob/main/screenshot.png?raw=true)
+![alt text](https://github.com/xNinjaKittyx/blocked-agh/blob/latest/screenshot.png?raw=true)
 
 
 ## Requirements
@@ -60,6 +60,7 @@ environment:
   - NTFY_TOPIC=YourUnblockTopic
   - NTFY_TOKEN=your_actual_ntfy_token
   - BACKGROUND_IMAGE_URL=https://example.com/your-image.jpg
+  - CORS_ALLOWED_ORIGINS=https://ntfy.sh,http://your-server:8000
 ```
 
 4. Start the service:
@@ -90,6 +91,7 @@ export NTFY_URL=https://ntfy.sh
 export NTFY_TOPIC=UnblockRequests
 export NTFY_TOKEN=your_ntfy_token
 export BACKGROUND_IMAGE_URL=https://example.com/image.jpg
+export CORS_ALLOWED_ORIGINS=https://ntfy.sh,http://your-server:8000
 ```
 
 4. Run the application:

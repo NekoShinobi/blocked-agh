@@ -15,5 +15,6 @@ services:
       - NTFY_TOPIC=UnblockRequests
       - NTFY_TOKEN=your_ntfy_token
       - BACKGROUND_IMAGE_URL=
+      - CORS_ALLOWED_ORIGINS=http://blocked-agh:8000
     depends_on:
       - adguardhome
