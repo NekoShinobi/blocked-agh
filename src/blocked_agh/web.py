@@ -5,6 +5,7 @@ import os
 import aiohttp
 
 from starlette.applications import Starlette
+from starlette.middleware.cors import CORSMiddleware
 from starlette.responses import HTMLResponse, JSONResponse
 from starlette.routing import Route
 
@@ -19,6 +20,11 @@ NTFY_TOPIC = os.getenv("NTFY_TOPIC", "UnblockRequests")
 
 BLOCKED_AGH_URL = os.getenv("BLOCKED_AGH_URL", "http://localhost:8000")
 BACKGROUND_IMAGE_URL = os.getenv("BACKGROUND_IMAGE_URL", "")
+
+# CORS configuration - comma-separated list of allowed origins
+# Example: "http://localhost:3000,https://example.com,https://app.example.com"
+# Use "*" to allow all origins (not recommended for production)
+CORS_ALLOWED_ORIGINS = os.getenv("CORS_ALLOWED_ORIGINS", "").split(",") if os.getenv("CORS_ALLOWED_ORIGINS") else []
 
 if not all(
     (
@@ -365,6 +371,7 @@ async def request_unblock(request):
                                 "Content-Type": "application/json",
                             },
                             "body": json.dumps({"url": url}),
+                            "clear": True,
                         }
                     ],
                 }
@@ -427,3 +434,13 @@ app = Starlette(
         Route("/api/unblock_url", unblock_url, methods=["POST"]),
     ],
 )
+
+# Add CORS middleware if origins are configured
+if CORS_ALLOWED_ORIGINS:
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=CORS_ALLOWED_ORIGINS,
+        allow_credentials=True,
+        allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+        allow_headers=["*"],
+    )
