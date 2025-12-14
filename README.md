@@ -111,6 +111,24 @@ uv run uvicorn blocked_agh.web:app --host 0.0.0.0 --port 8000
 | `NTFY_TOPIC` | Ntfy topic for notifications | Yes | `UnblockRequests` |
 | `NTFY_TOKEN` | Ntfy authentication token | Yes | - |
 | `BACKGROUND_IMAGE_URL` | URL for background image | No | - |
+| `CORS_ALLOWED_ORIGINS` | Comma-separated list of allowed CORS origins | No | - |
+
+### CORS Configuration
+
+To allow cross-origin requests from specific domains, set the `CORS_ALLOWED_ORIGINS` environment variable:
+
+```bash
+# Single origin
+export CORS_ALLOWED_ORIGINS="https://example.com"
+
+# Multiple origins (comma-separated, no spaces)
+export CORS_ALLOWED_ORIGINS="http://localhost:3000,https://example.com,https://app.example.com"
+
+# Allow all origins (not recommended for production)
+export CORS_ALLOWED_ORIGINS="*"
+```
+
+If this variable is not set or empty, CORS will be disabled and only same-origin requests will be allowed.
 
 ## Usage
 
