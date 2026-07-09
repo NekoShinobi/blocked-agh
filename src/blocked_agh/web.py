@@ -55,24 +55,40 @@ async def homepage(request):  # noqa: RUF029
     # ruff: disable[E501]
     styles = f"""
         <style>
+            :root {{
+                --accent: #818cf8;
+                --accent-strong: #6366f1;
+                --glass: rgba(255, 255, 255, 0.08);
+                --glass-border: rgba(255, 255, 255, 0.16);
+                --field: rgba(255, 255, 255, 0.07);
+                --field-border: rgba(255, 255, 255, 0.14);
+                --text: #f8fafc;
+                --text-muted: rgba(248, 250, 252, 0.62);
+                --radius: 18px;
+                --ease: cubic-bezier(0.16, 1, 0.3, 1);
+            }}
+            * {{
+                box-sizing: border-box;
+            }}
             body {{
                 margin: 0;
                 padding: 0;
                 font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
                 min-height: 100vh;
                 position: relative;
-                overflow: hidden;
+                color: var(--text);
+                background:
+                    radial-gradient(1200px 600px at 15% -10%, #312e81 0%, transparent 60%),
+                    radial-gradient(1000px 700px at 100% 110%, #4c1d95 0%, transparent 55%),
+                    linear-gradient(160deg, #0f172a 0%, #1e1b4b 100%);
             }}
             .background {{
                 position: fixed;
-                top: -10px;
-                left: -10px;
-                width: calc(100% + 20px);
-                height: calc(100% + 20px);
+                inset: -12px;
                 background-image: url('{BACKGROUND_IMAGE_URL}');
                 background-size: cover;
                 background-position: center;
-                filter: blur(2px) saturate(120%) contrast(120%) brightness(50%);
+                filter: blur(3px) saturate(115%) contrast(112%) brightness(52%);
                 z-index: -1;
             }}
             .content {{
@@ -81,97 +97,190 @@ async def homepage(request):  # noqa: RUF029
                 display: flex;
                 align-items: center;
                 justify-content: center;
+                padding: 24px;
             }}
             .container {{
                 text-align: center;
-                padding: 40px;
-                max-width: 600px;
-                width: 90%;
+                width: 100%;
+                max-width: 440px;
+                animation: rise 0.6s var(--ease) both;
+            }}
+            .brand {{
+                display: inline-flex;
+                align-items: center;
+                gap: 10px;
+                margin-bottom: 8px;
+            }}
+            .brand-dot {{
+                width: 10px;
+                height: 10px;
+                border-radius: 50%;
+                background: var(--accent);
+                box-shadow: 0 0 0 4px rgba(129, 140, 248, 0.25);
             }}
             h1 {{
-                color: white;
-                font-size: 3em;
-                margin-bottom: 40px;
-                text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+                color: var(--text);
+                font-size: 2rem;
+                font-weight: 700;
+                letter-spacing: -0.02em;
+                margin: 0;
             }}
-            .input-container {{
-                filter: none !important;
-                background: white;
-                border-radius: 12px;
-                padding: 20px;
-                box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            .subtitle {{
+                color: var(--text-muted);
+                font-size: 0.95rem;
+                margin: 6px 0 28px;
+            }}
+            .card {{
+                background: var(--glass);
+                -webkit-backdrop-filter: blur(22px) saturate(140%);
+                backdrop-filter: blur(22px) saturate(140%);
+                border: 1px solid var(--glass-border);
+                border-radius: var(--radius);
+                padding: 26px;
+                box-shadow: 0 24px 60px -20px rgba(0, 0, 0, 0.55);
+            }}
+            .field {{
+                position: relative;
+                display: flex;
+                align-items: center;
+            }}
+            .field svg {{
+                position: absolute;
+                left: 16px;
+                width: 18px;
+                height: 18px;
+                color: var(--text-muted);
+                pointer-events: none;
             }}
             input[type="text"] {{
                 width: 100%;
-                padding: 15px;
-                font-size: 16px;
-                border: 2px solid #e0e0e0;
-                border-radius: 8px;
-                box-sizing: border-box;
-                transition: border-color 0.3s;
+                padding: 15px 16px 15px 44px;
+                font-size: 15px;
+                color: var(--text);
+                background: var(--field);
+                border: 1px solid var(--field-border);
+                border-radius: 12px;
+                transition: border-color 0.25s, box-shadow 0.25s, background 0.25s;
+            }}
+            input[type="text"]::placeholder {{
+                color: var(--text-muted);
             }}
             input[type="text"]:focus {{
                 outline: none;
-                border-color: #667eea;
+                background: rgba(255, 255, 255, 0.11);
+                border-color: var(--accent);
+                box-shadow: 0 0 0 4px rgba(129, 140, 248, 0.22);
             }}
             button {{
-                margin-top: 15px;
-                padding: 15px 40px;
-                font-size: 16px;
-                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-                color: white;
-                border: none;
-                border-radius: 8px;
-                cursor: pointer;
-                transition: transform 0.2s, box-shadow 0.2s;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                gap: 8px;
+                width: 100%;
+                margin-top: 14px;
+                padding: 14px 24px;
+                font-size: 15px;
                 font-weight: 600;
+                font-family: inherit;
+                color: white;
+                background: linear-gradient(135deg, var(--accent-strong) 0%, #8b5cf6 100%);
+                border: none;
+                border-radius: 12px;
+                cursor: pointer;
+                transition: transform 0.2s var(--ease), box-shadow 0.2s, filter 0.2s;
             }}
             button:hover {{
                 transform: translateY(-2px);
-                box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+                box-shadow: 0 12px 28px -10px rgba(99, 102, 241, 0.7);
             }}
             button:active {{
                 transform: translateY(0);
             }}
+            button:disabled {{
+                cursor: default;
+                opacity: 0.75;
+                transform: none;
+                box-shadow: none;
+                filter: saturate(0.8);
+            }}
+            .spinner {{
+                width: 16px;
+                height: 16px;
+                border: 2px solid rgba(255, 255, 255, 0.4);
+                border-top-color: #fff;
+                border-radius: 50%;
+                animation: spin 0.7s linear infinite;
+            }}
             #result {{
-                margin-top: 20px;
-                padding: 15px;
-                border-radius: 8px;
+                margin-top: 16px;
+                padding: 14px 16px;
+                border-radius: 12px;
                 display: none;
-                font-size: 18px;
+                align-items: center;
+                gap: 10px;
+                font-size: 15px;
                 font-weight: 600;
+                text-align: left;
+                border: 1px solid transparent;
+                animation: rise 0.35s var(--ease) both;
+            }}
+            #result.show {{
+                display: flex;
+            }}
+            #result::before {{
+                content: '';
+                width: 9px;
+                height: 9px;
+                border-radius: 50%;
+                flex: 0 0 auto;
+                background: currentColor;
+                box-shadow: 0 0 10px currentColor;
             }}
             .not-blocked {{
-                background: #d4edda;
-                color: #28a745;
-                border: 1px solid #c3e6cb;
+                background: rgba(34, 197, 94, 0.14);
+                color: #4ade80;
+                border-color: rgba(34, 197, 94, 0.32) !important;
             }}
             .whitelisted {{
-                background: #d1ecf1;
-                color: #17a2b8;
-                border: 1px solid #bee5eb;
+                background: rgba(56, 189, 248, 0.14);
+                color: #38bdf8;
+                border-color: rgba(56, 189, 248, 0.32) !important;
             }}
             .blocked {{
-                background: #f8d7da;
-                color: #dc3545;
-                border: 1px solid #f5c6cb;
+                background: rgba(239, 68, 68, 0.14);
+                color: #f87171;
+                border-color: rgba(239, 68, 68, 0.32) !important;
             }}
             .error {{
-                background: #f8d7da;
-                color: #721c24;
-                border: 1px solid #f5c6cb;
+                background: rgba(245, 158, 11, 0.14);
+                color: #fbbf24;
+                border-color: rgba(245, 158, 11, 0.32) !important;
             }}
             #unblockBtn {{
                 display: none;
-                margin-top: 10px;
-                background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
+                margin-top: 12px;
+                background: linear-gradient(135deg, #f43f5e 0%, #ec4899 100%);
             }}
             #unblockBtn:hover {{
-                background: linear-gradient(135deg, #ff5252 0%, #e04b5f 100%);
+                box-shadow: 0 12px 28px -10px rgba(244, 63, 94, 0.7);
             }}
-            .button-container {{
-                display: flex;
-                justify-content: center;
+            .footnote {{
+                margin-top: 22px;
+                font-size: 0.78rem;
+                color: var(--text-muted);
+            }}
+            @keyframes rise {{
+                from {{ opacity: 0; transform: translateY(12px); }}
+                to {{ opacity: 1; transform: translateY(0); }}
+            }}
+            @keyframes spin {{
+                to {{ transform: rotate(360deg); }}
+            }}
+            @media (prefers-reduced-motion: reduce) {{
+                *, *::before, *::after {{
+                    animation-duration: 0.001ms !important;
+                    transition-duration: 0.001ms !important;
+                }}
             }}
         </style>
     """
@@ -181,15 +290,24 @@ async def homepage(request):  # noqa: RUF029
         <div class="background"></div>
         <div class="content">
             <div class="container">
-                <h1>URL Checker</h1>
-                <div class="input-container">
-                    <input type="text" id="urlInput" placeholder="Enter URL to check if blocked by AGH" />
-                    <button onclick="checkUrl()">Check URL</button>
-                    <div id="result"></div>
-                    <div class="button-container">
-                        <button id="unblockBtn" onclick="requestUnblock()">Request Unblock</button>
-                    </div>
+                <div class="brand">
+                    <span class="brand-dot"></span>
+                    <h1>URL Checker</h1>
                 </div>
+                <p class="subtitle">Check if a domain is blocked by AdGuard Home</p>
+                <div class="card">
+                    <div class="field">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <circle cx="11" cy="11" r="8"></circle>
+                            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                        </svg>
+                        <input type="text" id="urlInput" placeholder="e.g. logs.netflix.com" autocomplete="off" spellcheck="false" />
+                    </div>
+                    <button id="checkBtn" onclick="checkUrl()">Check URL</button>
+                    <div id="result" role="status" aria-live="polite"></div>
+                    <button id="unblockBtn" onclick="requestUnblock()">Request Unblock</button>
+                </div>
+                <p class="footnote">Powered by AdGuard Home</p>
             </div>
         </div>
     """
@@ -199,21 +317,37 @@ async def homepage(request):  # noqa: RUF029
         <script>
             let currentUrl = '';
 
+            function showResult(text, kind) {
+                const resultDiv = document.getElementById('result');
+                resultDiv.textContent = text;
+                resultDiv.className = 'show ' + kind;
+            }
+
+            function setLoading(button, isLoading, label) {
+                if (isLoading) {
+                    button.disabled = true;
+                    button.dataset.label = button.textContent;
+                    button.innerHTML = '<span class="spinner"></span>' + (label || 'Working...');
+                } else {
+                    button.disabled = false;
+                    button.textContent = button.dataset.label || button.textContent;
+                }
+            }
+
             async function checkUrl() {
                 const urlInput = document.getElementById('urlInput');
-                const resultDiv = document.getElementById('result');
+                const checkBtn = document.getElementById('checkBtn');
                 const unblockBtn = document.getElementById('unblockBtn');
                 const url = urlInput.value.trim();
 
                 unblockBtn.style.display = 'none';
 
                 if (!url) {
-                    resultDiv.textContent = 'Please enter a URL';
-                    resultDiv.className = 'error';
-                    resultDiv.style.display = 'block';
+                    showResult('Please enter a URL', 'error');
                     return;
                 }
 
+                setLoading(checkBtn, true, 'Checking...');
                 try {
                     const response = await fetch('/api/checkurl', {
                         method: 'POST',
@@ -227,36 +361,30 @@ async def homepage(request):  # noqa: RUF029
                     currentUrl = url;
 
                     if (data.status === 'NotFilteredNotFound') {
-                        resultDiv.textContent = 'Not Blocked';
-                        resultDiv.className = 'not-blocked';
+                        showResult('Not Blocked', 'not-blocked');
                     } else if (data.status === 'NotFilteredWhiteList') {
-                        resultDiv.textContent = 'Whitelisted';
-                        resultDiv.className = 'whitelisted';
+                        showResult('Whitelisted', 'whitelisted');
                     } else if (data.status === 'FilteredBlackList') {
-                        resultDiv.textContent = 'Blocked';
-                        resultDiv.className = 'blocked';
-                        unblockBtn.style.display = 'block';
+                        showResult('Blocked', 'blocked');
+                        unblockBtn.style.display = 'flex';
                     } else {
-                        resultDiv.textContent = 'Status: ' + data.status;
-                        resultDiv.className = 'error';
+                        showResult('Status: ' + data.status, 'error');
                     }
-
-                    resultDiv.style.display = 'block';
                 } catch (error) {
-                    resultDiv.textContent = 'Error: ' + error.message;
-                    resultDiv.className = 'error';
-                    resultDiv.style.display = 'block';
+                    showResult('Error: ' + error.message, 'error');
+                } finally {
+                    setLoading(checkBtn, false);
                 }
             }
 
             async function requestUnblock() {
-                const resultDiv = document.getElementById('result');
                 const unblockBtn = document.getElementById('unblockBtn');
 
                 if (!currentUrl) {
                     return;
                 }
 
+                setLoading(unblockBtn, true, 'Sending...');
                 try {
                     const response = await fetch('/api/request_unblock', {
                         method: 'POST',
@@ -269,16 +397,16 @@ async def homepage(request):  # noqa: RUF029
                     const data = await response.json();
 
                     if (response.ok) {
-                        resultDiv.textContent = data.message || 'Unblock request submitted successfully';
-                        resultDiv.className = 'whitelisted';
+                        showResult(data.message || 'Unblock request submitted successfully', 'whitelisted');
+                        setLoading(unblockBtn, false);
                         unblockBtn.style.display = 'none';
                     } else {
-                        resultDiv.textContent = 'Failed to submit unblock request: ' + (data.error || 'Unknown error');
-                        resultDiv.className = 'error';
+                        showResult('Failed to submit unblock request: ' + (data.error || 'Unknown error'), 'error');
+                        setLoading(unblockBtn, false);
                     }
                 } catch (error) {
-                    resultDiv.textContent = 'Error: ' + error.message;
-                    resultDiv.className = 'error';
+                    showResult('Error: ' + error.message, 'error');
+                    setLoading(unblockBtn, false);
                 }
             }
 

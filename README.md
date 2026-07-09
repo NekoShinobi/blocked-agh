@@ -1,238 +1,236 @@
-# Blocked AGH
+<div align="center">
+
+# 🛡️ Blocked AGH
+
+**A dead-simple web UI to check if a domain is blocked by [AdGuard Home](https://adguard.com/en/adguard-home/overview.html) — and request an unblock with one tap.**
+
+[![Python](https://img.shields.io/badge/python-3.13%2B-3776AB?logo=python&logoColor=white)](https://www.python.org/)
+[![Docker](https://img.shields.io/badge/ghcr.io-blocked--agh-2496ED?logo=docker&logoColor=white)](https://github.com/NekoShinobi/blocked-agh/pkgs/container/blocked-agh)
+[![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
+
+![URL Checker web interface](https://github.com/NekoShinobi/blocked-agh/blob/latest/screenshot.png?raw=true)
+
+</div>
+
+---
 
 ## Why?
 
-I wanted to create a simple site where my family could get a really simple UI to just check to see if a site has been blocked by my AdGuardHome instance and a workflow that will submit an unblock request.
+I wanted a really simple site where my family could check whether a domain is blocked by my AdGuard Home instance, plus a workflow to submit an unblock request without giving anyone access to the AdGuard dashboard.
 
-**Please note that the endpoints are not protected at all in anyway, so do not use this over public networks.**
+> [!WARNING]
+> The endpoints are **not authenticated in any way**. Do **not** expose this over public networks — run it behind a VPN, a reverse proxy with auth, or on a trusted LAN only.
 
-(Disclaimer, Rest of README written mostly by Claude)
-
-A web interface for checking if URLs are blocked by AdGuard Home and requesting unblocks through notifications.
+> _Disclaimer: the rest of this README (and most of the UI) was written mostly by Claude._
 
 ## Features
 
-- 🔍 **URL Checker** - Simple web UI to check if a URL is blocked by AdGuard Home
-- 🚫 **Block Status Detection** - Displays clear status indicators:
-  - ✅ Not Blocked (green)
-  - ⚪ Whitelisted (light blue)
-  - 🔴 Blocked (red)
-- 🔔 **Unblock Requests** - Send unblock requests via Ntfy notifications with one-click approval
-- 🎨 **Customizable Background** - Configure your own background image via environment variable
-- 🐳 **Docker Ready** - Easy deployment with Docker Compose
+- 🔍 **URL Checker** — check any domain against AdGuard Home from a clean web UI
+- 🚦 **Clear status** — Not Blocked (green) · Whitelisted (blue) · Blocked (red)
+- 🔔 **One-tap unblock** — sends an [ntfy](https://ntfy.sh) notification with an approve button
+- ✅ **One-click approval** — approving the notification adds an allowlist rule to AdGuard Home
+- 🎨 **Custom background** — point it at any image via an env var (falls back to a gradient)
+- 🐳 **Docker-ready** — a prebuilt image is published to GHCR on every release
 
-## Screenshots
+## Quick Start
 
-The web interface features a clean, modern design with a blurred background image and a centered input box for checking URLs.
+The recommended way to run Blocked AGH is the **published Docker image**:
 
-![alt text](https://github.com/xNinjaKittyx/blocked-agh/blob/latest/screenshot.png?raw=true)
-
-
-## Requirements
-
-- Python 3.13+
-- AdGuard Home instance
-- Ntfy server (for unblock notifications)
-
-## Installation
-
-### Using Docker Compose (Recommended)
-
-1. Clone the repository:
-```bash
-git clone https://github.com/yourusername/blocked-agh.git
-cd blocked-agh
+```
+ghcr.io/nekoshinobi/blocked-agh:latest
 ```
 
-2. Copy the example compose file:
+### Docker (one-liner)
+
 ```bash
-cp compose.example.yml compose.yml
+docker run -d \
+  --name blocked-agh \
+  -p 8000:8000 \
+  -e ADGUARDHOME_URL=http://your-adguard-home:3000 \
+  -e ADGUARDHOME_USER=admin \
+  -e ADGUARDHOME_PASS=your_password \
+  -e BLOCKED_AGH_URL=http://your-server:8000 \
+  -e NTFY_URL=https://ntfy.sh \
+  -e NTFY_TOPIC=UnblockRequests \
+  -e NTFY_TOKEN=your_ntfy_token \
+  ghcr.io/nekoshinobi/blocked-agh:latest
 ```
 
-3. Edit `compose.yml` with your configuration:
+Then open <http://localhost:8000>.
+
+### Docker Compose (recommended)
+
 ```yaml
-environment:
-  - ADGUARDHOME_URL=http://your-adguard-home:3000
-  - ADGUARDHOME_USER=admin
-  - ADGUARDHOME_PASS=your_actual_password
-  - BLOCKED_AGH_URL=http://your-server:8000
-  - NTFY_URL=https://ntfy.sh
-  - NTFY_TOPIC=YourUnblockTopic
-  - NTFY_TOKEN=your_actual_ntfy_token
-  - BACKGROUND_IMAGE_URL=https://example.com/your-image.jpg
-  - CORS_ALLOWED_ORIGINS=https://ntfy.sh,http://your-server:8000
+services:
+  blocked-agh:
+    image: ghcr.io/nekoshinobi/blocked-agh:latest
+    container_name: blocked-agh
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      - ADGUARDHOME_URL=http://adguardhome:3000
+      - ADGUARDHOME_USER=admin
+      - ADGUARDHOME_PASS=your_password
+      - BLOCKED_AGH_URL=http://blocked-agh:8000
+      - NTFY_URL=https://ntfy.sh
+      - NTFY_TOPIC=UnblockRequests
+      - NTFY_TOKEN=your_ntfy_token
+      - BACKGROUND_IMAGE_URL=
+      - CORS_ALLOWED_ORIGINS=http://blocked-agh:8000
 ```
 
-4. Start the service:
 ```bash
 docker compose up -d
 ```
 
-### Manual Installation
+> A ready-to-edit [`compose.example.yml`](compose.example.yml) is included in the repo — copy it to `compose.yml` and fill in your values.
 
-1. Clone the repository:
+<details>
+<summary><strong>Alternative: run from source (uv)</strong></summary>
+
+Requires Python 3.13+ and [uv](https://docs.astral.sh/uv/).
+
 ```bash
-git clone https://github.com/yourusername/blocked-agh.git
+git clone https://github.com/NekoShinobi/blocked-agh.git
 cd blocked-agh
-```
-
-2. Install dependencies using uv:
-```bash
 uv sync
-```
 
-3. Set environment variables:
-```bash
-export ADGUARDHOME_URL=http://your-adguard-home:3000
-export ADGUARDHOME_USER=admin
-export ADGUARDHOME_PASS=your_password
-export BLOCKED_AGH_URL=http://localhost:8000
-export NTFY_URL=https://ntfy.sh
-export NTFY_TOPIC=UnblockRequests
-export NTFY_TOKEN=your_ntfy_token
-export BACKGROUND_IMAGE_URL=https://example.com/image.jpg
-export CORS_ALLOWED_ORIGINS=https://ntfy.sh,http://your-server:8000
-```
-
-4. Run the application:
-```bash
+# set env vars (see Configuration below), then:
 uv run uvicorn blocked_agh.web:app --host 0.0.0.0 --port 8000
 ```
 
+</details>
+
+## Requirements
+
+- An **AdGuard Home** instance (with API access)
+- An **ntfy** server + topic (for unblock notifications)
+- **Docker**, _or_ Python 3.13+ with [uv](https://docs.astral.sh/uv/) to run from source
+
 ## Configuration
 
-### Environment Variables
+All configuration is done through environment variables.
 
 | Variable | Description | Required | Default |
-|----------|-------------|----------|---------|
-| `ADGUARDHOME_URL` | AdGuard Home API URL | Yes | - |
-| `ADGUARDHOME_USER` | AdGuard Home username | Yes | `admin` |
-| `ADGUARDHOME_PASS` | AdGuard Home password | Yes | - |
-| `BLOCKED_AGH_URL` | Public URL of this service | Yes | `http://localhost:8000` |
-| `NTFY_URL` | Ntfy server URL | No | `https://ntfy.sh` |
-| `NTFY_TOPIC` | Ntfy topic for notifications | Yes | `UnblockRequests` |
-| `NTFY_TOKEN` | Ntfy authentication token | Yes | - |
-| `BACKGROUND_IMAGE_URL` | URL for background image | No | - |
-| `CORS_ALLOWED_ORIGINS` | Comma-separated list of allowed CORS origins | No | - |
+|----------|-------------|:--------:|---------|
+| `ADGUARDHOME_URL` | AdGuard Home API URL | ✅ | — |
+| `ADGUARDHOME_USER` | AdGuard Home username | ✅ | `admin` |
+| `ADGUARDHOME_PASS` | AdGuard Home password | ✅ | — |
+| `BLOCKED_AGH_URL` | Public URL of this service (used in the ntfy action button) | ✅ | `http://localhost:8000` |
+| `NTFY_TOPIC` | ntfy topic for notifications | ✅ | `UnblockRequests` |
+| `NTFY_TOKEN` | ntfy authentication token | ✅ | — |
+| `NTFY_URL` | ntfy server URL | ⬜ | `https://ntfy.sh` |
+| `BACKGROUND_IMAGE_URL` | Background image URL (blank → gradient fallback) | ⬜ | — |
+| `CORS_ALLOWED_ORIGINS` | Comma-separated list of allowed CORS origins | ⬜ | — |
 
-### CORS Configuration
+### CORS
 
-To allow cross-origin requests from specific domains, set the `CORS_ALLOWED_ORIGINS` environment variable:
+The ntfy "Unblock" button calls this service from a different origin, so you may need to allow it:
 
 ```bash
 # Single origin
-export CORS_ALLOWED_ORIGINS="https://example.com"
+CORS_ALLOWED_ORIGINS="https://blocked.example.com"
 
 # Multiple origins (comma-separated, no spaces)
-export CORS_ALLOWED_ORIGINS="http://localhost:3000,https://example.com,https://app.example.com"
+CORS_ALLOWED_ORIGINS="https://ntfy.sh,http://your-server:8000"
 
-# Allow all origins (not recommended for production)
-export CORS_ALLOWED_ORIGINS="*"
+# Allow all origins (not recommended)
+CORS_ALLOWED_ORIGINS="*"
 ```
 
-If this variable is not set or empty, CORS will be disabled and only same-origin requests will be allowed.
+If unset or empty, CORS is disabled and only same-origin requests are allowed.
 
 ## Usage
 
-1. Navigate to `http://localhost:8000` (or your configured URL)
-2. Enter a URL in the input box
-3. Click "Check URL" or press Enter
-4. View the block status:
-   - **Not Blocked** - URL is allowed
-   - **Whitelisted** - URL is explicitly whitelisted
-   - **Blocked** - URL is blocked by AdGuard Home
-5. If blocked, click "Request Unblock" to send a notification
-6. Approve the unblock from your Ntfy notification
+1. Open `http://localhost:8000` (or your `BLOCKED_AGH_URL`).
+2. Enter a domain and click **Check URL** (or press <kbd>Enter</kbd>).
+3. Read the status:
+   - **Not Blocked** — the domain is allowed
+   - **Whitelisted** — the domain is explicitly on the allowlist
+   - **Blocked** — the domain is blocked by AdGuard Home
+4. If it's blocked, click **Request Unblock** to fire off an ntfy notification.
+5. Approve the request from the ntfy notification — the domain is unblocked instantly.
 
-## API Endpoints
+## How It Works
 
-### `POST /api/checkurl`
-Check if a URL is blocked by AdGuard Home.
+1. **Check** — the service authenticates to AdGuard Home and queries its filtering API for the domain.
+2. **Request** — an unblock request posts an ntfy notification carrying an HTTP action button.
+3. **Approve** — tapping the button calls `POST /api/unblock_url` on this service.
+4. **Unblock** — the service appends an allowlist rule to AdGuard Home in the form `@@||domain.com^$important`.
 
-**Request:**
+## API Reference
+
+<details>
+<summary><code>POST /api/checkurl</code> — check if a domain is blocked</summary>
+
+**Request**
 ```json
-{
-  "url": "example.com"
-}
+{ "url": "example.com" }
 ```
 
-**Response:**
+**Response**
 ```json
 {
   "url": "example.com",
-  "status": "NotFilteredNotFound|NotFilteredWhiteList|FilteredBlackList",
-  "result": { ... }
+  "status": "NotFilteredNotFound | NotFilteredWhiteList | FilteredBlackList",
+  "result": { }
 }
 ```
+</details>
 
-### `POST /api/request_unblock`
-Request to unblock a URL (sends notification).
+<details>
+<summary><code>POST /api/request_unblock</code> — send an unblock notification</summary>
 
-**Request:**
+**Request**
 ```json
-{
-  "url": "example.com"
-}
+{ "url": "example.com" }
 ```
 
-**Response:**
+**Response**
 ```json
 {
   "url": "example.com",
   "message": "Unblock request notification sent successfully"
 }
 ```
+</details>
 
-### `POST /api/unblock_url`
-Unblock a URL in AdGuard Home (called from notification action).
+<details>
+<summary><code>POST /api/unblock_url</code> — apply the unblock (called by the ntfy action)</summary>
 
-**Request:**
+**Request**
 ```json
-{
-  "url": "example.com"
-}
+{ "url": "example.com" }
 ```
 
-**Response:**
+**Response**
 ```json
 {
   "url": "example.com",
   "message": "Unblock request completed successfully"
 }
 ```
+</details>
 
 ## Development
 
-1. Install development dependencies:
 ```bash
-uv sync
+uv sync                                       # install deps (incl. dev extras)
+uv run uvicorn blocked_agh.web:app --reload   # run with auto-reload
+uv run pytest tests                           # run the test suite
 ```
 
-2. Run with auto-reload:
-```bash
-uv run uvicorn blocked_agh.web:app --reload
-```
+Run the dev stack with Docker Compose:
 
-3. Run with Docker Compose in development mode:
 ```bash
 docker compose -f compose-dev.yml up
 ```
 
-## How It Works
+## Contributing
 
-1. **URL Check**: The service queries AdGuard Home's filtering API to check if a URL is blocked
-2. **Unblock Request**: When a user requests an unblock, a notification is sent to Ntfy with an action button
-3. **One-Click Approval**: Clicking the notification button calls the `/api/unblock_url` endpoint
-4. **AdGuard Update**: The service adds an allowlist rule to AdGuard Home using the format `@@||domain.com^$important`
+Contributions are welcome — please open an issue or submit a pull request.
 
 ## License
 
-See [LICENSE](LICENSE) file for details.
-
-## Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request.
-
-## Support
-
-If you encounter any issues or have questions, please open an issue on GitHub.
+Released under the [MIT License](LICENSE).
